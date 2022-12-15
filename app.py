@@ -6,7 +6,7 @@ import subprocess
 
 if __name__ == '__main__':
     vals =["1", "231", "321", "22221", "223231", "2323231", "3232321"]
-    box = sg.Listbox(values=vals, enable_events=True, size=(145, 40),
+    box = sg.Listbox(values=vals, enable_events=True, size=(145, 35),
         key="-SCROLL-WINDOW-"
     )
 
@@ -16,7 +16,7 @@ if __name__ == '__main__':
         vals.append("xxx")
     box.scroll_width =100
     box.scroll_arrow_width=100
-    layout = [[box], [sg.Button("OK"), sg.Button("TOP"), sg.Button("HOLD"), sg.Button("UPDATE"), sg.Button("CLOSE")]]
+    layout = [[sg.Button("OK"), sg.Button("TOP"), sg.Button("HOLD"), sg.Button("UPDATE"), sg.Button("CLOSE")], [box]]
     window = sg.Window(title="Obrotnica", layout=layout, margins=(20, 20), no_titlebar=True, location=(0, 0), size=(1024, 600), keep_on_top=True)
     while True:
         event, values = window.read()
