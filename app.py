@@ -1,7 +1,7 @@
 
 from datetime import datetime
 import PySimpleGUI as sg
-
+import subprocess
 
 
 if __name__ == '__main__':
@@ -17,13 +17,17 @@ if __name__ == '__main__':
         vals.append("xxx")
     box.scroll_width =100
     box.scroll_arrow_width=100
-    layout = [[box], [sg.Button("OK"), sg.Button("TOP"), sg.Button("HOLD"), sg.Button("CLOSE")]]
+    layout = [[box], [sg.Button("OK"), sg.Button("TOP"), sg.Button("HOLD"), sg.Button("UPDATE"), sg.Button("CLOSE")]]
     window = sg.Window(title="Obrotnica", layout=layout, margins=(20, 20), no_titlebar=True, location=(0, 0), size=(1024, 600), keep_on_top=True)
     while True:
         event, values = window.read()
         # End program if user closes window or
         # presses the OK button
         if event == "CLOSE":
+            break
+        if event == "UPDATE":
+            process = subprocess.Popen(["git", "pull"], stdout=subprocess.PIPE)
+            process2 = subprocess.Popen(["python", "app.py"], stdout=subprocess.PIPE)
             break
         if event == "TOP":
             window["-SCROLL-WINDOW-"].update(vals, set_to_index=[0], scroll_to_index=0)
