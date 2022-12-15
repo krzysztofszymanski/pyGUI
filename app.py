@@ -6,8 +6,7 @@ import subprocess
 
 if __name__ == '__main__':
     vals =["1", "231", "321", "22221", "223231", "2323231", "3232321"]
-    box = sg.Listbox(
-        values= vals , enable_events=True, size=(140, 20),auto_size_text=True,
+    box = sg.Listbox(values=vals, enable_events=True, size=(145, 42),
         key="-SCROLL-WINDOW-"
     )
 
