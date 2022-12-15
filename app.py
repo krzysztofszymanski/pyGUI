@@ -16,7 +16,7 @@ if __name__ == '__main__':
         vals.append("xxx")
     box.scroll_width =100
     box.scroll_arrow_width=100
-    layout = [[sg.Button("OK"), sg.Button("TOP"), sg.Button("HOLD"), sg.Button("UPDATE"), sg.Button("CLOSE")], [box]]
+    layout = [[sg.Button("OK"), sg.Button("TOP"), sg.Button("HOLD"), sg.Button("UPDATE"), sg.Button("CLOSE"), sg.Button("GET STATUS")], [box]]
     window = sg.Window(title="Obrotnica", layout=layout, margins=(20, 20), no_titlebar=True, location=(0, 0), size=(1024, 600), keep_on_top=True)
     while True:
         event, values = window.read()
