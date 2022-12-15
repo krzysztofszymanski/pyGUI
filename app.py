@@ -13,6 +13,7 @@ arduino_port = None
 for port in all_ports:
     if port.name.find("usbserial"):
         arduino_port = port
+        print(arduino_port.device)
 arduino = serial.Serial(port=arduino_port.device, baudrate=9600, timeout=.1)
 
 
