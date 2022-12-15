@@ -5,6 +5,7 @@ import serial.tools.list_ports
 
 all_ports = serial.tools.list_ports.comports()
 print(all_ports)
+vals = []
 
 arduino_port = None
 
@@ -12,11 +13,16 @@ for port in all_ports:
     if port.name.find("USB") != -1:
         arduino_port = port
         print(arduino_port.device)
-arduino = serial.Serial(port=arduino_port.device, baudrate=9600, timeout=.1)
+arduino = None
+
+if arduino_port:
+    arduino = serial.Serial(port=arduino_port.device, baudrate=9600, timeout=.1)
+else:
+    vals.append("no connection");
 
 if __name__ == '__main__':
-    vals = []
-    box = sg.Listbox(values=vals, enable_events=True, size=(145, 35), key="-SCROLL-WINDOW-")
+
+    box = sg.Listbox(values=vals, enable_events=True, size=(145, 35), key="-SCROLL-WINDOW-", font=("Helvetica", 15))
 
     box.scroll_width = 100
     box.scroll_arrow_width = 100
@@ -29,15 +35,16 @@ if __name__ == '__main__':
     while True:
         event, values = window.read(timeout=1)
         # read data from serial.
-        data = arduino.readline().strip()
-        if data:
-            vals.insert(0, "{} {}".format(str(datetime.now()), data))
-            # max 1000 rows.
-            vals = vals[:1000]
-            index = 0
-            if len(window["-SCROLL-WINDOW-"].get_indexes()) and window["-SCROLL-WINDOW-"].get_indexes()[0]:
-                index = window["-SCROLL-WINDOW-"].get_indexes()[0] + 1
-            window["-SCROLL-WINDOW-"].update(vals, set_to_index=[index], scroll_to_index=index)
+        if arduino:
+            data = arduino.readline().strip()
+            if data:
+                vals.insert(0, "{} {}".format(str(datetime.now()), data))
+                # max 1000 rows.
+                vals = vals[:1000]
+                index = 0
+                if len(window["-SCROLL-WINDOW-"].get_indexes()) and window["-SCROLL-WINDOW-"].get_indexes()[0]:
+                    index = window["-SCROLL-WINDOW-"].get_indexes()[0] + 1
+                window["-SCROLL-WINDOW-"].update(vals, set_to_index=[index], scroll_to_index=index)
 
         if event == "CLOSE":
             break
