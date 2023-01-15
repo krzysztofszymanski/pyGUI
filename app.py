@@ -26,14 +26,14 @@ if __name__ == '__main__':
 
     box.scroll_width = 100
     box.scroll_arrow_width = 100
-    size = (11, 3)
+    size = (20, 4)
     layout1 = [[sg.Button("GORA", size=size)], [box]]
     layout2 = [
-        [sg.Text('Czas wibracji:(s)', size=(25, 1), font='Courier 25'), sg.Slider(orientation ='horizontal', key='stSlider', default_value=10, range=(0,20), font='Courier 25',size=(20,50)), ],
-        [sg.Text('Interwał magazynu:', size=(25, 1), font='Courier 25'),  sg.Slider(orientation='horizontal', key='stSlider', default_value=200, range=(100, 300), font='Courier 25', size=(20, 50))],
+        [sg.Text('Czas wibracji:(s)', size=(25, 1), font='Courier 25'), sg.Slider(orientation ='horizontal', key='vibrationDuration', default_value=10, range=(0,20), font='Courier 25',size=(20,50)), ],
+        [sg.Text('Interwał magazynu:', size=(25, 1), font='Courier 25'),  sg.Slider(orientation='horizontal', key='magInterval', default_value=200, range=(100, 300), font='Courier 25', size=(20, 50))],
 
-        [sg.Text('Powtórzenia magazynu:', size=(25, 1), font='Courier 25'), sg.Slider(orientation ='horizontal', key='stSlider', default_value=5, range=(0,10), font='Courier 25', size=(20,50))],
-        [sg.Button("UPDATE", size=size), sg.Button("ZAMKNIJ", size=size)]
+        [sg.Text('Powtórzenia magazynu:', size=(25, 1), font='Courier 25'), sg.Slider(orientation ='horizontal', key='magRepeats', default_value=5, range=(0,10), font='Courier 25', size=(20,50))],
+        [sg.Button("ZASTOSUJ USTAWIENIA", size=size), sg.Button("UPDATE", size=size), sg.Button("ZAMKNIJ", size=size)]
     ]
 
     layout = [[sg.TabGroup([[sg.Tab('Logi', layout1, font='Courier 45'),
@@ -45,6 +45,7 @@ if __name__ == '__main__':
     while True:
         event, values = window.read(timeout=1)
         # read data from serial.
+
         if arduino:
             data = arduino.readline().strip()
 
@@ -58,6 +59,15 @@ if __name__ == '__main__':
                 if len(window["-SCROLL-WINDOW-"].get_indexes()) and window["-SCROLL-WINDOW-"].get_indexes()[0]:
                     index = window["-SCROLL-WINDOW-"].get_indexes()[0] + 1
                 window["-SCROLL-WINDOW-"].update(vals, set_to_index=[index], scroll_to_index=index)
+
+        if event == "ZASTOSUJ USTAWIENIA":
+            mag_interval = values["magInterval"]
+            mag_repeats = values["magRepeats"]
+            vibration_duration = values["vibrationDuration"]
+
+            
+
+            pass
 
         if event == "ZAMKNIJ":
             break
