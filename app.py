@@ -29,8 +29,10 @@ if __name__ == '__main__':
     size = (11, 3)
     layout1 = [[sg.Button("GORA", size=size)], [box]]
     layout2 = [
-        [sg.Text('Czas wibracji:(s)', size=(25, 1), font='Courier 25'), sg.Slider(orientation ='horizontal', key='stSlider', range=(0,20), font='Courier 25',size=(20,50)), ],
-        [sg.Text('Powtorzenia magazynu:', size=(25, 1), font='Courier 25'), sg.Slider(orientation ='horizontal', key='stSlider', range=(0,10), font='Courier 25', size=(20,50))],
+        [sg.Text('Czas wibracji:(s)', size=(25, 1), font='Courier 25'), sg.Slider(orientation ='horizontal', key='stSlider', default_value=10, range=(0,20), font='Courier 25',size=(20,50)), ],
+        [sg.Text('Interwał magazynu:', size=(25, 1), font='Courier 25'),  sg.Slider(orientation='horizontal', key='stSlider', default_value=200, range=(100, 300), font='Courier 25', size=(20, 50))],
+
+        [sg.Text('Powtórzenia magazynu:', size=(25, 1), font='Courier 25'), sg.Slider(orientation ='horizontal', key='stSlider', default_value=5, range=(0,10), font='Courier 25', size=(20,50))],
         [sg.Button("UPDATE", size=size), sg.Button("ZAMKNIJ", size=size)]
     ]
 
