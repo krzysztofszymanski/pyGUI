@@ -30,10 +30,13 @@ def try_connect():
     global arduino_port
     global arduino
     for port in all_ports:
-        if port.name.find("USB") != -1 or port.name.find("usbserial") != -1:
-            arduino_port = port
-            add_log_entry("połączono z :" + arduino_port.device)
-            arduino = serial.Serial(port=arduino_port.device, baudrate=9600, timeout=.1)
+        try:
+            if port.name.find("USB") != -1 or port.name.find("usbserial") != -1:
+                arduino_port = port
+                add_log_entry("połączono z :" + arduino_port.device)
+                arduino = serial.Serial(port=arduino_port.device, baudrate=9600, timeout=.1)
+        except Exception as ex:
+            add_log_entry("ex")
     if not arduino:
         add_log_entry("brak polaczenia")
 
@@ -81,6 +84,7 @@ if __name__ == '__main__':
                 date_str = str(datetime.now())[:22]
                 vals.insert(0, "{} {}".format(date_str, "connection lost"))
                 arduino = None
+                arduino_port = None
                 try_connect()
 
         if event == "ZASTOSUJ USTAWIENIA":
