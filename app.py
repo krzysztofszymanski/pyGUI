@@ -13,12 +13,13 @@ for port in all_ports:
     if port.name.find("USB") != -1 or port.name.find("usbserial") != -1:
         arduino_port = port
         print(arduino_port.device)
+    vals.append(port.name)
 arduino = None
 
 if arduino_port:
     arduino = serial.Serial(port=arduino_port.device, baudrate=9600, timeout=.1)
 else:
-    vals.append("no connection");
+    vals.append("brak poloczenia");
 
 if __name__ == '__main__':
 
@@ -65,7 +66,6 @@ if __name__ == '__main__':
             mag_repeats = values["magRepeats"]
             vibration_duration = values["vibrationDuration"]
 
-            
 
             pass
 
