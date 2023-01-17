@@ -3,6 +3,9 @@ from datetime import datetime
 import PySimpleGUI as sg
 import subprocess
 import serial.tools.list_ports
+import os.path
+
+from pathlib import Path
 
 all_ports = serial.tools.list_ports.comports()
 print(all_ports)
@@ -12,14 +15,35 @@ window = None
 arduino_port = None
 arduino = None
 
+settings_file_path = "{}/panel_settings.json".format(str(Path.home()))
+
+if os.path.isfile(settings_file_path):
+    with open(settings_file_path, 'r') as file:
+        try:
+            json_values = file.read()
+            values = json.loads(json_values)
+            mag_interval = values["interval"]
+            mag_repeats = values["repeats"]
+            mag_vibration_duration = values["vibration_duration"]
+        except Exception as ex:
+            mag_interval = 300
+            mag_repeats = 10
+            mag_vibration_duration = 10
+else:
+    mag_interval = 300
+    mag_repeats = 10
+    mag_vibration_duration = 10
+
 
 def add_log_entry(data_to_log):
     global vals
     date_str = str(datetime.now())[:22]
-    vals.insert(0, "{} {}".format(date_str, data_to_log))
+    message = "{} {}".format(date_str, data_to_log)
+    vals.insert(0, message)
     # max 1000 rows.
     vals = vals[:1000]
     index = 0
+    print(message)
     if window:
         if len(window["-SCROLL-WINDOW-"].get_indexes()) and window["-SCROLL-WINDOW-"].get_indexes()[0]:
             index = window["-SCROLL-WINDOW-"].get_indexes()[0] + 1
@@ -53,14 +77,17 @@ if __name__ == '__main__':
     layout1 = [[sg.Button("GORA", size=size), sg.Button("POLACZ PONOWNIE", size=size)], [box]]
     layout2 = [
         [sg.Text('Czas wibracji:(s)', size=(25, 1), font='Courier 25'),
-         sg.Slider(orientation='horizontal', key='vibrationDuration', default_value=10, range=(0, 20),
+         sg.Slider(orientation='horizontal', key='vibrationDuration', default_value=mag_vibration_duration,
+                   range=(0, 20),
                    font='Courier 25', size=(20, 50)), ],
         [sg.Text('Interwał magazynu:', size=(25, 1), font='Courier 25'),
-         sg.Slider(orientation='horizontal', key='magInterval', default_value=200, range=(100, 500), font='Courier 25',
+         sg.Slider(orientation='horizontal', key='magInterval', default_value=mag_interval, range=(100, 500),
+                   font='Courier 25',
                    size=(20, 50))],
 
         [sg.Text('Powtórzenia magazynu:', size=(25, 1), font='Courier 25'),
-         sg.Slider(orientation='horizontal', key='magRepeats', default_value=5, range=(0, 20), font='Courier 25',
+         sg.Slider(orientation='horizontal', key='magRepeats', default_value=mag_repeats, range=(0, 20),
+                   font='Courier 25',
                    size=(20, 50))],
         [sg.Button("ZASTOSUJ USTAWIENIA", size=size), sg.Button("UPDATE", size=size), sg.Button("ZAMKNIJ", size=size)]
     ]
@@ -90,15 +117,16 @@ if __name__ == '__main__':
         if event == "ZASTOSUJ USTAWIENIA":
             mag_interval = values["magInterval"]
             mag_repeats = values["magRepeats"]
-            vibration_duration = values["vibrationDuration"]
+            mag_vibration_duration = values["vibrationDuration"]
 
             settings = {"interval": mag_interval,
                         "repeats": mag_repeats,
-                        "vibration_duration": vibration_duration}
+                        "vibration_duration": mag_vibration_duration}
+            json_str = json.dumps(settings)
+            with open(settings_file_path, 'w') as file:
+                file.write(json_str)
 
             if arduino:
-                json_str = json.dumps(settings)
-
                 arduino.write(bytes(json_str + "\n", encoding='utf8'))
                 arduino.flush()
 
