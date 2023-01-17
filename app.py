@@ -28,17 +28,17 @@ def add_log_entry(data_to_log):
 
 def try_connect():
     global arduino_port
+    global arduino
     for port in all_ports:
         if port.name.find("USB") != -1 or port.name.find("usbserial") != -1:
             arduino_port = port
             add_log_entry("połączono z :" + arduino_port.device)
+            arduino = serial.Serial(port=arduino_port.device, baudrate=9600, timeout=.1)
+    if not arduino:
+        add_log_entry("brak polaczenia")
+
 
 try_connect()
-if arduino_port:
-    arduino = serial.Serial(port=arduino_port.device, baudrate=9600, timeout=.1)
-else:
-    vals.append("brak połączenia");
-
 
 if __name__ == '__main__':
 
@@ -49,10 +49,16 @@ if __name__ == '__main__':
     size = (20, 4)
     layout1 = [[sg.Button("GORA", size=size), sg.Button("POLACZ PONOWNIE", size=size)], [box]]
     layout2 = [
-        [sg.Text('Czas wibracji:(s)', size=(25, 1), font='Courier 25'), sg.Slider(orientation ='horizontal', key='vibrationDuration', default_value=10, range=(0,20), font='Courier 25',size=(20,50)), ],
-        [sg.Text('Interwał magazynu:', size=(25, 1), font='Courier 25'),  sg.Slider(orientation='horizontal', key='magInterval', default_value=200, range=(100, 300), font='Courier 25', size=(20, 50))],
+        [sg.Text('Czas wibracji:(s)', size=(25, 1), font='Courier 25'),
+         sg.Slider(orientation='horizontal', key='vibrationDuration', default_value=10, range=(0, 20),
+                   font='Courier 25', size=(20, 50)), ],
+        [sg.Text('Interwał magazynu:', size=(25, 1), font='Courier 25'),
+         sg.Slider(orientation='horizontal', key='magInterval', default_value=200, range=(100, 300), font='Courier 25',
+                   size=(20, 50))],
 
-        [sg.Text('Powtórzenia magazynu:', size=(25, 1), font='Courier 25'), sg.Slider(orientation ='horizontal', key='magRepeats', default_value=5, range=(0,10), font='Courier 25', size=(20,50))],
+        [sg.Text('Powtórzenia magazynu:', size=(25, 1), font='Courier 25'),
+         sg.Slider(orientation='horizontal', key='magRepeats', default_value=5, range=(0, 10), font='Courier 25',
+                   size=(20, 50))],
         [sg.Button("ZASTOSUJ USTAWIENIA", size=size), sg.Button("UPDATE", size=size), sg.Button("ZAMKNIJ", size=size)]
     ]
 
@@ -70,7 +76,6 @@ if __name__ == '__main__':
             try:
                 data = arduino.readline().strip()
                 if data:
-
                     add_log_entry(data)
             except Exception as ex:
                 date_str = str(datetime.now())[:22]
@@ -84,8 +89,8 @@ if __name__ == '__main__':
             vibration_duration = values["vibrationDuration"]
 
             settings = {"interval": mag_interval,
-                         "repeats": mag_repeats,
-                         "vibration_duration": vibration_duration}
+                        "repeats": mag_repeats,
+                        "vibration_duration": vibration_duration}
             if arduino:
                 json_str = json.dumps(settings)
                 arduino.write(settings)
