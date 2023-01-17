@@ -8,13 +8,13 @@ print(all_ports)
 vals = []
 
 arduino_port = None
-
-for port in all_ports:
-    if port.name.find("USB") != -1 or port.name.find("usbserial") != -1:
-        arduino_port = port
-        print(arduino_port.device)
-
 arduino = None
+
+def try_connect():
+    for port in all_ports:
+        if port.name.find("USB") != -1 or port.name.find("usbserial") != -1:
+            arduino_port = port
+            print(arduino_port.device)
 
 if arduino_port:
     arduino = serial.Serial(port=arduino_port.device, baudrate=9600, timeout=.1)
@@ -49,18 +49,24 @@ if __name__ == '__main__':
         # read data from serial.
 
         if arduino:
-            data = arduino.readline().strip()
+            try:
+                data = arduino.readline().strip()
+                if data:
+                    date_str = str(datetime.now())[:22]
 
-            if data:
+                    vals.insert(0, "{} {}".format(date_str, data))
+                    # max 1000 rows.
+                    vals = vals[:1000]
+                    index = 0
+                    if len(window["-SCROLL-WINDOW-"].get_indexes()) and window["-SCROLL-WINDOW-"].get_indexes()[0]:
+                        index = window["-SCROLL-WINDOW-"].get_indexes()[0] + 1
+                    window["-SCROLL-WINDOW-"].update(vals, set_to_index=[index], scroll_to_index=index)
+            except Exception as ex:
                 date_str = str(datetime.now())[:22]
+                vals.insert(0, "{} {}".format(date_str, "connection lost"))
+                arduino = None
+                try_connect()
 
-                vals.insert(0, "{} {}".format(date_str, data))
-                # max 1000 rows.
-                vals = vals[:1000]
-                index = 0
-                if len(window["-SCROLL-WINDOW-"].get_indexes()) and window["-SCROLL-WINDOW-"].get_indexes()[0]:
-                    index = window["-SCROLL-WINDOW-"].get_indexes()[0] + 1
-                window["-SCROLL-WINDOW-"].update(vals, set_to_index=[index], scroll_to_index=index)
 
         if event == "ZASTOSUJ USTAWIENIA":
             mag_interval = values["magInterval"]
