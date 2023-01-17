@@ -8,7 +8,6 @@ import os.path
 from pathlib import Path
 
 all_ports = serial.tools.list_ports.comports()
-print(all_ports)
 vals = []
 
 window = None
@@ -64,8 +63,19 @@ def try_connect():
     if not arduino:
         add_log_entry("brak połączenia")
 
+def send_settings():
+    global settings, json_str
+    if arduino:
+        settings = {"interval": mag_interval,
+                    "repeats": mag_repeats,
+                    "vibration_duration": mag_vibration_duration}
+        json_str = json.dumps(settings)
+        arduino.write(bytes(json_str + "\n", encoding='utf8'))
+        arduino.flush()
+
 
 try_connect()
+send_settings()
 
 if __name__ == '__main__':
 
@@ -126,9 +136,7 @@ if __name__ == '__main__':
             with open(settings_file_path, 'w') as file:
                 file.write(json_str)
 
-            if arduino:
-                arduino.write(bytes(json_str + "\n", encoding='utf8'))
-                arduino.flush()
+            send_settings()
 
             pass
 
