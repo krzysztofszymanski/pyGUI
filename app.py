@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 import PySimpleGUI as sg
 import subprocess
@@ -7,20 +8,37 @@ all_ports = serial.tools.list_ports.comports()
 print(all_ports)
 vals = []
 
+window = None
 arduino_port = None
 arduino = None
 
+
+def add_log_entry(data_to_log):
+    global vals
+    date_str = str(datetime.now())[:22]
+    vals.insert(0, "{} {}".format(date_str, data_to_log))
+    # max 1000 rows.
+    vals = vals[:1000]
+    index = 0
+    if window:
+        if len(window["-SCROLL-WINDOW-"].get_indexes()) and window["-SCROLL-WINDOW-"].get_indexes()[0]:
+            index = window["-SCROLL-WINDOW-"].get_indexes()[0] + 1
+        window["-SCROLL-WINDOW-"].update(vals, set_to_index=[index], scroll_to_index=index)
+
+
 def try_connect():
+    global arduino_port
     for port in all_ports:
         if port.name.find("USB") != -1 or port.name.find("usbserial") != -1:
             arduino_port = port
-            print(arduino_port.device)
+            add_log_entry("połączono z :" + arduino_port.device)
 
+try_connect()
 if arduino_port:
     arduino = serial.Serial(port=arduino_port.device, baudrate=9600, timeout=.1)
-    vals.append("polaczono z: " + arduino_port.name);
 else:
-    vals.append("brak poloczenia");
+    vals.append("brak połączenia");
+
 
 if __name__ == '__main__':
 
@@ -29,7 +47,7 @@ if __name__ == '__main__':
     box.scroll_width = 100
     box.scroll_arrow_width = 100
     size = (20, 4)
-    layout1 = [[sg.Button("GORA", size=size)], [box]]
+    layout1 = [[sg.Button("GORA", size=size), sg.Button("POLACZ PONOWNIE", size=size)], [box]]
     layout2 = [
         [sg.Text('Czas wibracji:(s)', size=(25, 1), font='Courier 25'), sg.Slider(orientation ='horizontal', key='vibrationDuration', default_value=10, range=(0,20), font='Courier 25',size=(20,50)), ],
         [sg.Text('Interwał magazynu:', size=(25, 1), font='Courier 25'),  sg.Slider(orientation='horizontal', key='magInterval', default_value=200, range=(100, 300), font='Courier 25', size=(20, 50))],
@@ -52,29 +70,29 @@ if __name__ == '__main__':
             try:
                 data = arduino.readline().strip()
                 if data:
-                    date_str = str(datetime.now())[:22]
 
-                    vals.insert(0, "{} {}".format(date_str, data))
-                    # max 1000 rows.
-                    vals = vals[:1000]
-                    index = 0
-                    if len(window["-SCROLL-WINDOW-"].get_indexes()) and window["-SCROLL-WINDOW-"].get_indexes()[0]:
-                        index = window["-SCROLL-WINDOW-"].get_indexes()[0] + 1
-                    window["-SCROLL-WINDOW-"].update(vals, set_to_index=[index], scroll_to_index=index)
+                    add_log_entry(data)
             except Exception as ex:
                 date_str = str(datetime.now())[:22]
                 vals.insert(0, "{} {}".format(date_str, "connection lost"))
                 arduino = None
                 try_connect()
 
-
         if event == "ZASTOSUJ USTAWIENIA":
             mag_interval = values["magInterval"]
             mag_repeats = values["magRepeats"]
             vibration_duration = values["vibrationDuration"]
 
-
+            settings = {"interval": mag_interval,
+                         "repeats": mag_repeats,
+                         "vibration_duration": vibration_duration}
+            if arduino:
+                json_str = json.dumps(settings)
+                arduino.write(settings)
             pass
+
+        if event == "POLACZ PONOWNIE":
+            try_connect()
 
         if event == "ZAMKNIJ":
             break
