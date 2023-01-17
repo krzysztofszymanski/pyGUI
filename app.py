@@ -56,11 +56,11 @@ if __name__ == '__main__':
          sg.Slider(orientation='horizontal', key='vibrationDuration', default_value=10, range=(0, 20),
                    font='Courier 25', size=(20, 50)), ],
         [sg.Text('Interwał magazynu:', size=(25, 1), font='Courier 25'),
-         sg.Slider(orientation='horizontal', key='magInterval', default_value=200, range=(100, 300), font='Courier 25',
+         sg.Slider(orientation='horizontal', key='magInterval', default_value=200, range=(100, 500), font='Courier 25',
                    size=(20, 50))],
 
         [sg.Text('Powtórzenia magazynu:', size=(25, 1), font='Courier 25'),
-         sg.Slider(orientation='horizontal', key='magRepeats', default_value=5, range=(0, 10), font='Courier 25',
+         sg.Slider(orientation='horizontal', key='magRepeats', default_value=5, range=(0, 20), font='Courier 25',
                    size=(20, 50))],
         [sg.Button("ZASTOSUJ USTAWIENIA", size=size), sg.Button("UPDATE", size=size), sg.Button("ZAMKNIJ", size=size)]
     ]
@@ -96,11 +96,12 @@ if __name__ == '__main__':
                         "repeats": mag_repeats,
                         "vibration_duration": vibration_duration}
 
-
             if arduino:
                 json_str = json.dumps(settings)
 
-                arduino.writelines(str.encode(json_str))
+                arduino.write(bytes(json_str + "\n", encoding='utf8'))
+                arduino.flush()
+
             pass
 
         if event == "POLACZ PONOWNIE":
