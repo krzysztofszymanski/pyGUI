@@ -35,10 +35,10 @@ def try_connect():
                 arduino_port = port
                 add_log_entry("połączono z :" + arduino_port.device)
                 arduino = serial.Serial(port=arduino_port.device, baudrate=9600, timeout=.1)
-        except Exception as ex:
-            add_log_entry("ex")
+        except Exception as exception:
+            add_log_entry(exception)
     if not arduino:
-        add_log_entry("brak polaczenia")
+        add_log_entry("brak połączenia")
 
 
 try_connect()
@@ -95,9 +95,12 @@ if __name__ == '__main__':
             settings = {"interval": mag_interval,
                         "repeats": mag_repeats,
                         "vibration_duration": vibration_duration}
+
+
             if arduino:
                 json_str = json.dumps(settings)
-                arduino.write(settings)
+
+                arduino.writelines(str.encode(json_str))
             pass
 
         if event == "POLACZ PONOWNIE":
